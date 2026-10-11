@@ -1,0 +1,73 @@
+# Pipeline runs on woodpecker.k8s.somemissing.info (kubernetes backend).
+# Image builds go through the shared rootless buildkitd in
+# k8s-manifests/vmubtkube-a/woodpecker/buildkit.woodpecker.yaml — no
+# docker.sock, no privileged steps. registry.apps.nickv.me accepts
+# unauthenticated pushes, so no docker_auth secret is required.
+#
+# Tags follow the Selfoss-Docker scheme: YYYYMMDD-<short sha> of the built
+# commit (commit date, UTC), plus `latest`. vmubtkube-a's Renovate rule parses
+# the date as one integer: regex:^(?<major>\d{8})-[a-f0-9]+$
+
+when:
+  - event: push
+    branch: main
+  - event: pull_request
+  # manual runs on main re-push the same tags, useful after a transient
+  # registry/build failure
+  - event: manual
+
+steps:
+  compute-tag:
+    # renovate: datasource=docker depName=alpine/git
+    image: alpine/git:2.54.0
+    environment:
+      TZ: UTC
+    commands:
+      - git config --global --add safe.directory "$CI_WORKSPACE"
+      - date=$(git log -1 --format=%cd --date=format-local:%Y%m%d)
+      - sha=$(git rev-parse --short=7 HEAD)
+      - echo "$date-$sha" > .image-tag
+      - cat .image-tag
+
+  build:
+    # renovate: datasource=docker depName=moby/buildkit
+    image: moby/buildkit:v0.34.0
+    environment:
+      BUILDKIT_HOST: tcp://buildkitd.woodpecker.svc.cluster.local:1234
+    commands:
+      - >-
+        buildctl build
+        --frontend dockerfile.v0
+        --local context=.
+        --local dockerfile=.
+    when:
+      - event: pull_request
+
+  build-and-push:
+    # renovate: datasource=docker depName=moby/buildkit
+    image: moby/buildkit:v0.34.0
+    environment:
+      BUILDKIT_HOST: tcp://buildkitd.woodpecker.svc.cluster.local:1234
+    commands:
+      - IMAGE=registry.apps.nickv.me/nijave/yt-dlp
+      - TAG=$(cat .image-tag)
+      # vmubtkube-a tracks the dated tag; latest is kept for ad-hoc pulls
+      # and the pre-CI latest@digest pin.
+      - NAMES="$IMAGE:$TAG,$IMAGE:latest"
+      - >-
+        buildctl build
+        --frontend dockerfile.v0
+        --local context=.
+        --local dockerfile=.
+        --output "type=image,\"name=$NAMES\",push=true"
+    when:
+      - event: push
+        branch: main
+        # Build only when files the image consumes change. README-only
+        # changes skip the build instead of churning a new image tag.
+        path:
+          include: ['Dockerfile', 'usr/**', 'etc/**', '.woodpecker.yaml']
+      # a manual run on another branch must not publish a dated tag that
+      # Renovate would pick up
+      - event: manual
+        branch: main

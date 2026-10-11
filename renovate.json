@@ -1,0 +1,31 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "customManagers:dockerfileVersions"],
+  "dockerfile": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "description": "yt-dlp is the packaged upstream (the git submodule's role in Selfoss-Docker): automerge its bumps, like Selfoss-Docker automerges the selfoss submodule",
+      "matchManagers": ["custom.regex"],
+      "matchPackageNames": ["yt-dlp"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "description": "Deno: automerge non-major releases",
+      "matchManagers": ["custom.regex"],
+      "matchPackageNames": ["denoland/deno"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "description": "bgutil-ytdlp-pot-provider: the plugin major must match the provider server sidecar in nijave/vmubtkube-a yt-dlp.yaml (2.x). Hold majors here until the sidecar moves; no automerge so the pair stays in step",
+      "matchPackageNames": ["bgutil-ytdlp-pot-provider"],
+      "allowedVersions": "<3"
+    }
+  ]
+}
