@@ -20,7 +20,7 @@ ARG BGUTIL_YTDLP_POT_PROVIDER_VERSION=2.0.2
 # Deno: JavaScript runtime used by yt-dlp to solve YouTube's sig/nsig challenges.
 # Without it, YouTube extraction falls back to deprecated client shortcuts.
 # renovate: datasource=github-releases depName=denoland/deno
-ARG DENO_VERSION=v2.9.7
+ARG DENO_VERSION=v2.9.8
 
 WORKDIR /
 
