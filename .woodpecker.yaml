@@ -19,7 +19,7 @@ when:
 steps:
   compute-tag:
     # renovate: datasource=docker depName=alpine/git
-    image: alpine/git:2.54.0
+    image: alpine/git:v2.54.1
     environment:
       TZ: UTC
     commands:
