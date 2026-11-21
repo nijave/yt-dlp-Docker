@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM lscr.io/linuxserver/ffmpeg:latest@sha256:822d04f0b2d0c4847430f5cc90f20ea48be866bb502ece63fdeb729400bf5361
+FROM lscr.io/linuxserver/ffmpeg:latest@sha256:66fa8e2351fb78f9dad2c59c946be2658edcc529339320da3f2cf788312368af
 
 # Upstream versions are pinned here and bumped by Renovate
 # (customManagers:dockerfileVersions in renovate.json).
