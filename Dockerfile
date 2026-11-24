@@ -10,7 +10,7 @@ FROM lscr.io/linuxserver/ffmpeg:latest@sha256:66fa8e2351fb78f9dad2c59c946be2658e
 # there weeks before a stable release); Renovate follows newer pre-releases
 # because the current value is already one.
 # renovate: datasource=pypi depName=yt-dlp
-ARG YT_DLP_VERSION=2026.10.26
+ARG YT_DLP_VERSION=2026.11.23
 
 # The PO Token plugin major must match the bgutil-ytdlp-pot-provider server
 # (the sidecar in vmubtkube-a yt-dlp.yaml, currently 2.x).
